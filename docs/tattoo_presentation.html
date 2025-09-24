@@ -1,0 +1,119 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentación sobre Tipos de Tatuajes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 2em;
+        }
+        section {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        footer {
+            text-align: center;
+            padding: 1em;
+            background-color: #2c3e50;
+            color: white;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tipos de Tatuajes</h1>
+        <p>Una exploración de la historia, estilos y significados</p>
+    </header>
+
+    <section id="historia">
+        <h2>Historia de los Tatuajes</h2>
+        <p>Los tatuajes han sido parte de las culturas humanas durante miles de años, desde las tribus polinesias hasta las civilizaciones modernas.</p>
+        <img src="historia1.jpg" alt="Tatuaje histórico 1">
+        <img src="historia2.jpg" alt="Tatuaje histórico 2">
+    </section>
+
+    <section id="estilos">
+        <h2>Estilos Populares</h2>
+        <p>Los estilos de tatuajes varían desde el tradicional hasta el realismo, geométrico, acuarela y más.</p>
+        <img src="estilo1.jpg" alt="Tatuaje estilo 1">
+        <img src="estilo2.jpg" alt="Tatuaje estilo 2">
+    </section>
+
+    <section id="significados">
+        <h2>Significados y Simbolismo</h2>
+        <p>Los tatuajes a menudo tienen significados personales o culturales, representando desde espiritualidad hasta hitos personales.</p>
+        <img src="significado1.jpg" alt="Tatuaje con significado 1">
+        <img src="significado2.jpg" alt="Tatuaje con significado 2">
+    </section>
+
+    <footer>
+        <p>&copy; 2025 Presentación sobre Tatuajes</p>
+    </footer>
+</body>
+</html>
